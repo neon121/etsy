@@ -6,14 +6,18 @@ abstract class DBUser {
     /**
      * @var mysqli
      */
-    protected static $DB;
-    public static $used = 0;
+    private static $DB;
+    private static $used = 0;
+    private static $requests = [];
     
     /**
      * @throws Exception
      */
     protected static function checkConnection() {
-        if (!self::$DB) self::$DB = DB::start();
+        if (!self::$DB) {
+            self::$DB = DB::start();
+            if (self::$DB) self::query("SET @@session.time_zone = '+00:00'");
+        }
         if (!self::$DB) throw new Exception('Cant connect to DB');
     }
     
@@ -24,8 +28,30 @@ abstract class DBUser {
      */
     public static function query($query) {
         self::$used++;
+        $backtrace = debug_backtrace()[0];
+        preg_match('/\/([^\/]+)$/',$backtrace['file'], $file);
+        $file = $file[1];
+        self::$requests[] = ["$file:{$backtrace['line']}", $query];
         self::checkConnection();
         return self::$DB->query($query);
+    }
+    
+    /**
+     * @return int|bool
+     */
+    public static function lastInsertId() {
+        return self::$DB->insert_id;
+    }
+    
+    public static function escapeString($str) {
+        return self::$DB->escape_string($str);
+    }
+    
+    public static function printLog($pre = false) {
+        if ($pre) echo '<pre>';
+        echo 'REQUESTS: ' . self::$used . "\n";
+        foreach (self::$requests as $request) echo $request[0] . "\n" . $request[1] . "\n\n";
+        if ($pre) echo '</pre>';
     }
 }
 
