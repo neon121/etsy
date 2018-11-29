@@ -1,0 +1,102 @@
+@bgColor: #444845;
+@txtColor: #cccccc;
+
+body {
+    min-width: 300px;
+    min-height: 500px;
+    font-family: 'Roboto', sans-serif;
+    background-color: @bgColor;
+    color: @txtColor;
+    
+    input, button {
+        outline: 0;
+        border: 1px solid transparent;
+        font-family: "Roboto Mono", monospace;
+        transition: 200ms;
+    }
+    input {
+        padding: 4px;
+        border-radius: 4px;
+        background-color: lighten(@bgColor, 10%);
+        color: lighten(@txtColor, 10%);
+        border-width: 0 0 1px;
+    }
+    button {
+        background-color: darken(@bgColor, 10%);
+        color: darken(@txtColor, 10%);
+        padding: 5px;
+        border-radius: 5px;
+    }
+    button:focus,
+    input:focus,
+    button:hover:not(:disabled),
+    input:hover:not(:disabled) {border-color: lighten(@bgColor, 30%)}
+    button:disabled,
+    input:disabled {opacity: 0.25}
+    input.error {
+        border-color: red;
+    }
+    #message {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 80%;
+        border: 1px solid lighten(@bgColor, 15%);
+        background-color: lighten(@bgColor, 5%);
+        color: red;
+        max-width: 50%;
+        border-radius: 0 0 0 8px;
+        z-index: 500;
+        text-align: right;
+        opacity: 0;
+    }
+    
+    >div {
+        padding: 5px;
+        position: relative;
+        display: none;
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        >.exit {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 18px;
+            height: 18px;
+            border: 1px solid @bgColor;
+            background-color: @bgColor;
+            border-radius: 50%;
+            z-index: 250;
+            cursor: pointer;
+            text-align: center;
+            transition: 300ms;
+        }
+        >.exit::after {
+            content: "x";
+        }
+        >.exit:hover {
+            box-shadow: 0 0 5px 1px lighten(@bgColor, 20%);
+            background-color: lighten(@bgColor, 20%);
+            border-color: lighten(@bgColor, 20%);
+            color: @bgColor;
+        }
+    }
+    >div.visible {display: block;}
+    
+    .login {
+        top: 190px;
+        text-align: center;
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+            .name {
+                width: 60px;
+                display: inline-block;
+                text-align: left;
+            }
+        }
+        button {margin-top: 10px;}
+    }
+}

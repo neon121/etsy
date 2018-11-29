@@ -6,6 +6,9 @@ $return = [];
 try {
     if (is_array($_POST['session'])) Session::load($_POST['session']['login'], $_POST['session']['password']);
     switch ($_POST['action']) {
+        case 'login':
+            //todo check how to login. Save session may be?
+            break;
         case 'addUser':
             $return['id'] = User::add($_POST['data']);
             break;

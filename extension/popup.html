@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Etsy helper</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i&amp;subset=cyrillic"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+    <link rel="stylesheet/less" type="text/css" href="css/popup.less">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/less.js/3.8.1/less.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/popup.js"></script>
+</head>
+<body>
+<div id="message"></div>
+<div class="login">
+    <div class="header">Авторизация</div>
+    <form>
+        <label>
+            <span class="name">Логин</span>
+            <input type="text" name="login">
+        </label>
+        <label>
+            <span class="name">Пароль</span>
+            <input type="password" name="password">
+        </label>
+        <button>Отправить</button>
+    </form>
+</div>
+<div class="admin visible">
+    <div class="exit"></div>
+    <ul class="tabs">
+        <li data-hash="shops" class="active">Магазины</li>
+        <li data-hash="users">Пользователи</li>
+        <li data-hash="stats">Статистика</li>
+    </ul>
+    <div class="tab active" data-hash="shops">
+    
+    </div>
+    <div class="tab" data-hash="users">
+    
+    </div>
+    <div class="tab" data-hash="stats">
+    
+    </div>
+</div>
+<div class="manager">
+    <div class="exit"></div>
+</div>
+</body>
+</html>
