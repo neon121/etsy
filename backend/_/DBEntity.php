@@ -8,14 +8,35 @@ abstract class DBEntity extends DBUser implements EntityInterface {
      * @throws Exception
      */
     public static function add($array) {
-        foreach ($array as $name => $value)
-            if (!self::_checkValue($name, $value))
-                throw new Exception("$name = '$value' did not pass check");
         $table = get_called_class();
+        foreach ($array as $name => $value)
+            if (!$table::_checkValue($name, $value))
+                throw new Exception("$name = '$value' did not pass check");
         $names = implode(', ', array_map(function($value) {return "`$value`";}, array_keys($array)));
-        $values = implode(', ', array_map(function($value) {return "'$value'";}, array_keys($array)));
+        $values = implode(', ',
+            array_map(
+                function($value) {
+                    if (is_int($value)) return $value;
+                    else if (is_bool($value)) return (int)$value;
+                    else return "'$value'";
+                },
+                $array
+            )
+        );
         self::query("INSERT INTO `$table` ($names) VALUES($values)");
         return self::lastInsertId();
+    }
+    
+    /**
+     * @param $id
+     * @return bool|object
+     * @throws Exception
+     */
+    public static function byId($id) {
+        $class = get_called_class();
+        $id = (int)$id;
+        $result = self::query("SELECT * FROM `$class` WHERE id = $id");
+        return $result->num_rows ? new $class($result->fetch_assoc()) : false;
     }
     
     /**
@@ -67,15 +88,16 @@ abstract class DBEntity extends DBUser implements EntityInterface {
      * @throws Exception
      */
     public function __construct($arg) {
+        $table = get_called_class();
         if (is_array($arg)) {
             foreach ($arg as $name => $value) {
-                if (!self::_checkValue($name, $value)) throw new Exception("$name = '$value' did not pass check");
+                if (!$table::_checkValue($name, $value)) throw new Exception("$name = '$value' did not pass check");
                 $this->$name = $value;
             }
             return $this;
         }
         else {
-            if (!self::_checkValue('id', $arg)) throw new Exception("id = $arg did not pass check");
+            if (!$table::_checkValue('id', $arg)) throw new Exception("id = $arg did not pass check");
             $table = get_called_class();
             $result = self::query("SELECT * FROM `$table` WHERE id = $arg");
             if ($result->num_rows) return new $table($result->fetch_row());

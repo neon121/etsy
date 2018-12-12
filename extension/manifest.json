@@ -4,6 +4,7 @@
   "version": "0.1",
   "content_security_policy": "script-src 'self' https://cdnjs.cloudflare.com; object-src 'self'",
   "description": "Etsy helper extension",
+  "options_page": "popup.html",
   "icons": {
     "16": "css/img/icon16.png",
     "48": "css/img/icon48.png",
