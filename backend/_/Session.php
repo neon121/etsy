@@ -68,6 +68,11 @@ class Session extends DBUser {
         else return false;
     }
     
+    public static function login() {
+        if (is_object(self::$User)) return self::$User->get('login');
+        else return false;
+    }
+    
     /**
      * @throws Exception
      */

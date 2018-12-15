@@ -77,6 +77,8 @@ class DB extends mysqli {
      * @return mysqli
      */
     public static function start() {
-        return new self(MYSQL_HOST, MYSQL_USER, MYSQL_PWD, MYSQL_DB);
+        $mysqli = new self(MYSQL_HOST, MYSQL_USER, MYSQL_PWD, MYSQL_DB);
+        $mysqli->set_charset('utf8');
+        return $mysqli;
     }
 }

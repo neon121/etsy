@@ -4,11 +4,15 @@ header ('access-control-allow-origin: chrome-extension://pbncfplklgiaglkhinpiohn
 ob_start();
 $return = ['result' => ''];
 try {
-    if (isset($_POST['hash'])) Session::load($_POST['hash']);
-    switch ($_POST['action']) {
+    if (isset($_POST['hash'])) {
+        Session::load($_POST['hash']);
+        if (!Session::hasAuth()) $return['result'] = 'AUTH_EXPIRED';
+    }
+    if (!$return['result']) switch ($_POST['action']) {
         case 'getGlobals':
             $return['result'] = [
-                'user' => ['regex' => User::regex],
+                'User' => ['regex' => User::regex],
+                'Shop' => ['regex' => Shop::regex],
                 'debug' => DEBUG
             ];
             break;
@@ -26,23 +30,48 @@ try {
         case 'destroySession':
             Session::destroy();
             break;
-        case 'addUser':
-            $return['result'] = User::add($_POST['data']);
+        case 'checkAuth':
+            $return['result'] =
+                (Session::hasAuth() && $_POST['role'] == Session::role() && $_POST['login'] == Session::login());
             break;
-        case 'changeUser':
-            User::changeById($_POST['id'], $_POST['name'], $_POST['value']);
+        case 'addEntity':
+            try {
+                $class = ($_POST['type']);
+                /** @var DBEntity $class */
+                $return['result'] = [
+                    'id' => $class::add($_POST['data']),
+                    'values' => [
+                        'created' => DBUser::query("SELECT NOW()")->fetch_row()[0]
+                    ]
+                ];
+            }
+            catch (InputException $E) {
+                $return['result'] = $E->arr();
+            }
             break;
-        case 'removeUser':
-            User::deleteById($_POST['id']);
+        case 'getEntity':
+            $Obj = ($_POST['type'])::byId($_POST['id']);
+            /** @var DBEntity $Obj */
+            if ($Obj) $return['result'] = $Obj->asArray();
+            else throw new Exception("Object {$_POST['type']} with id = {$_POST['id']} not found");
             break;
-        case 'addShop':
-            $return['result'] = Shop::add($_POST['data']);
+        case 'editEntity':
+            $Obj = ($_POST['type'])::byId($_POST['id']);
+            /** @var DBEntity $Obj */
+            if ($Obj) {
+                try {
+                    $return['result'] = $Obj->change($_POST['data']);
+                } catch (InputException $E) {
+                    $return['result'] = $E->arr();
+                }
+            }
+            else throw new Exception("Object {$_POST['type']} with id = {$_POST['id']} not found");
             break;
-        case 'changeShop':
-            Shop::changeById($_POST['id'], $_POST['name'], $_POST['value']);
-            break;
-        case 'removeShop':
-            Shop::deleteById($_POST['id']);
+        case 'deleteEntity':
+            $Obj = ($_POST['type'])::byId($_POST['id']);
+            /** @var DBEntity $Obj */
+            if ($Obj) $return['result'] = $Obj->delete();
+            else throw new Exception("Object {$_POST['type']} with id = {$_POST['id']} not found");
             break;
         case 'setAssignment':
             $return['result'] = Assignment::add($_POST['data']);
@@ -54,7 +83,7 @@ try {
             //todo
             break;
         case 'getList':
-            //todo
+            $return['result'] = ($_POST['type'])::getArrayList();
             break;
         default:
             throw new Exception("Wrong action '" . $_POST['action']."'");

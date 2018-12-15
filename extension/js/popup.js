@@ -12,45 +12,44 @@ $(() => {
         });
     }).then(response => {
         E.glb = response;
-        for (let i in E.glb.user.regex)
-            E.glb.user.regex[i] = new RegExp(E.glb.user.regex[i].substr(1).slice(0, -1));
+        for (let i in E.glb.User.regex)
+            E.glb.User.regex[i] = new RegExp(E.glb.User.regex[i].substr(1).slice(0, -1));
+        for (let i in E.glb.Shop.regex)
+            E.glb.Shop.regex[i] = new RegExp(E.glb.Shop.regex[i].substr(1).slice(0, -1));
     });
     E.get(['hash', 'role', 'login']).then(response => {
-        if (response.hash !== undefined) {
-            $('.screen.login').removeClass('visible');
-            if (response.role === 'manager') $('.screen.manager').addClass('visible');
-            else $('.screen.admin').addClass('visible');
+        if (response.hash) {
+            E.toggleAuth(true);
+            E.callAPI('checkAuth', response).then(response => {
+                if (!response || response === 'AUTH_EXPIRED') {
+                    E.msg("Авторизация потеряна", 'error');
+                    E.toggleAuth(false);
+                }
+            });
         }
-        if (response.login !== undefined) {
-            $('.screen.login [name=login]').val(response.login);
-            $('.hello .login').text(response.login);
-            $('.hello .role').text(response.role);
-        }
+    });
+    $.ajax('css/img/gear.svg').then(response => {
+        $('.tabs li[data-hash="opts"]').html(response.documentElement.outerHTML);
     });
     
     $('#message').click(() => E.msg(''));
     
     let screenLogin = $('.screen.login');
-    screenLogin.find('input').keypress(function() {
-        if ($(this).hasClass('error')) {
-            $(this).removeClass('error');
-            E.msg('');
-        }
-    });
+    screenLogin.find('input').keypress(function() {E.clearInputError($(this))});
     screenLogin.find('button').click(event => {
         event.preventDefault();
         let form = $('.screen.login');
         let loginInput = form.find('[name=login]');
         let login = loginInput.val();
-        let pwdInput = form.find('[name=password]')
+        let pwdInput = form.find('[name=password]');
         let password = pwdInput.val();
         E.msg('');
-        if (E.glb.user.regex.login.test(login) === false) {
+        if (E.glb.User.regex.login.test(login) === false) {
             E.msg('Логин указан неверно', 'error');
             loginInput.addClass('error');
             return;
         }
-        if (E.glb.user.regex.password.test(password) === false) {
+        if (E.glb.User.regex.password.test(password) === false) {
             E.msg('Пароль указан неверно', 'error');
             pwdInput.addClass('error');
             return;
@@ -68,22 +67,28 @@ $(() => {
             }
             else {
                 E.set({'hash': response.hash, role: response.role, login: login});
-                $('.screen.login').removeClass('visible');
-                if (response.role === 'manager') $('.screen.manager').addClass('visible');
-                else $('.screen.admin').addClass('visible');
-                $('.hello .login').text(login);
-                $('.hello .role').text(response.role);
+                E.toggleAuth(true);
             }
         });
     });
-    
-    $('.screen .exit').click(() => {
+    let screens = $('.screen');
+    screens.find('.add').click(function() {
+        E.toggleForm($(this).parents(".tab").attr('data-hash'));
+    });
+    E.appendEntityEvents(screens.find('.model'));
+    screens.find('.exit').click(() => {
         E.toggleLoadingScreen(true);
         E.callAPI('destroySession').then(() => {
-            $('.screen.visible').removeClass('visible');
-            $('.screen.login').addClass('visible');
-            E.rm(['hash', 'role']);
+            E.toggleAuth(false);
             E.toggleLoadingScreen(false);
         });
     });
+    screens.find('.tabs li').click(function() {
+        E.toggleTab($(this));
+    });
+    
+    let form = $('.form');
+    form.find('input, select').keypress(function() {E.clearInputError($(this))});
+    form.find('.close').click(() => E.toggleForm());
+    form.find('.ok').click(() => E.saveForm());
 });

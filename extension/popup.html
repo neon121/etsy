@@ -33,30 +33,69 @@
 <div class="admin screen">
     <div class="exit"></div>
     <div class="hello">
-        Вы вошли как <span class="loginUnderline"><span class="login"></span></span> (<span class="role"></span>)
+        <span class="loginUnderline"><span class="login"></span></span> (<span class="role"></span>)
     </div>
     <ul class="tabs">
-        <li data-hash="shops" class="active">Магазины</li>
-        <li data-hash="users">Пользователи</li>
+        <li data-hash="Shop">Магазины</li>
+        <li data-hash="User">Пользователи</li>
         <li data-hash="stats">Статистика</li>
+        <li data-hash="opts"></li>
     </ul>
-    <div class="tab active" data-hash="shops">
+    <div class="tab" data-hash="Shop">
+        <div class="add"></div>
         <table>
+            <thead>
+            <tr>
+                <td class="forButton"></td>
+                <td>Название</td>
+                <td>Создан</td>
+                <td class="forButton"></td>
+            </tr>
+            <tr class="model entity">
+                <td class="forButton"><a title="Изменить" class="edit" data-addSVG="pencil.svg"></a></td>
+                <td><input data-name="name" type="text"/></td>
+                <td data-name="created" data-type="date"></td>
+                <td class="forButton">
+                    <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
+                </td>
+            </tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
-    <div class="tab" data-hash="users">
-    
+    <div class="tab" data-hash="User">
+        <div class="add"></div>
     </div>
     <div class="tab" data-hash="stats">
-    
+        <div class="add"></div>
+    </div>
+    <div class="tab" data-hash="opts">
+        <div class="block">
+            <div class="header">Сменить пароль</div>
+            <label>Новый пароль <input type="text" name="password1"></label>
+            <label>Повторить <input type="text" name="password2"></label>
+        </div>
+    </div>
+</div>
+<div class="form" data-entity="Shop">
+    <div class="bg"></div>
+    <div class="content">
+        <div class="close"></div>
+        <div class="header">Магазин</div>
+        <label>Название <input type="text" name="name"></label>
+        <button class="ok">OK</button>
     </div>
 </div>
 <div class="manager screen">
     <div class="hello">
-        Вы вошли как <span class="loginUnderline"><span class="login"></span></span>
+        <span class="loginUnderline"><span class="login"></span></span>
     </div>
     <div class="exit"></div>
+    <ul class="tabs">
+        <li data-hash="stats">Статистика</li>
+        <li data-hash="opts"></li>
+    </ul>
+    <div class="tab active" data-hash="opts"></div>
 </div>
 </body>
 </html>

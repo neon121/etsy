@@ -45,7 +45,7 @@ class User extends DBEntity {
         elseif (!self::_checkValue('password', $password))
             throw new Exception("password = '$password' not passed check");
         else {
-            $result = self::query("SELECT * FROM `User` WHERE login = '$login'");
+            $result = self::query("SELECT * FROM `User` WHERE BINARY login = '$login'");
             if ($result->num_rows == 0) throw new NoSuchUserException();
             else {
                 $array = $result->fetch_assoc();
@@ -67,13 +67,12 @@ class User extends DBEntity {
     }
     
     /**
-     * @param string $name
-     * @param mixed $value
+     * @param array $array
      * @throws Exception
      */
-    public function change($name, $value) {
+    public function change($array) {
         //todo check rights
-        parent::change($name, $value);
+        parent::change($array);
     }
     
     /**

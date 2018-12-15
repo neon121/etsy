@@ -1,4 +1,9 @@
 <?php
+$string = "фываолывралоывр";
+$regex = '/^[-_\s\d\wа-яА-Я]+$/u';
+echo "$string\n$regex\n";
+var_dump(preg_match($regex, $string));
+exit;
 require '_/_.php';
 if (!DEBUG) exit;
 Session::debugMode();
