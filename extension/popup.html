@@ -65,6 +65,25 @@
     </div>
     <div class="tab" data-hash="User">
         <div class="add"></div>
+        <table>
+            <thead>
+            <tr>
+                <td class="forButton"></td>
+                <td>Название</td>
+                <td>Тип</td>
+                <td>Должен сменить пароль</td>
+                <td>Создан</td>
+            </tr>
+            <tr class="model entity">
+                <td class="forButton"><a title="Изменить" class="edit" data-addSVG="pencil.svg"></a></td>
+                <td data-name="login"></td>
+                <td data-name="role"></td>
+                <td><input type="checkbox" data-name="mustChangePassword"></td>
+                <td data-name="created" data-type="date"></td>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
     <div class="tab" data-hash="stats">
         <div class="add"></div>

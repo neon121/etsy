@@ -19,6 +19,7 @@ let E = {
         }
         else {
             let form = $('.form[data-entity="'+type+'"]');
+            if (form.length === 0) throw new Error('No form with type '+type);
             E.clearInputError(form.find('.error'));
             $('.screen').addClass('blur');
             if (id === null) {

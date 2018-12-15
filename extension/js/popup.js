@@ -3,7 +3,7 @@ const API = 'https://myvds.ml/etsy/api.php';
 $(() => {
     E.get('glb').then(response => {
         return new Promise(resolve => {
-            if (typeof response === 'undefined')
+            if (typeof response === 'undefined' || true)
                 E.callAPI('getGlobals').then(response => {
                     E.set({glb: response});
                     resolve(response);
