@@ -1,4 +1,3 @@
-const DEBUG = true;
 const API = 'https://myvds.ml/etsy/api.php';
 $(() => {
     E.get('glb').then(response => {

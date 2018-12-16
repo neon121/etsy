@@ -1,6 +1,5 @@
 <?php
 require '_/_.php';
-header ('access-control-allow-origin: chrome-extension://pbncfplklgiaglkhinpiohnhlmkiaefi');
 ob_start();
 $return = ['result' => ''];
 try {

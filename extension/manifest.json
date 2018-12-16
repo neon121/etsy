@@ -11,7 +11,7 @@
     "128": "css/img/icon128.png"
   },
   "permissions": [
-    "https://*.etsy.com/*", "https://etsy.com/",
+    "https://*.etsy.com/*", "https://etsy.com/", "https://myvds.ml/etsy/api.php",
     "tabs", "storage", "alarms"
   ],
   "browser_action": {

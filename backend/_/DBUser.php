@@ -16,7 +16,10 @@ abstract class DBUser {
     protected static function checkConnection() {
         if (!self::$DB) {
             self::$DB = DB::start();
-            if (self::$DB) self::query("SET @@session.time_zone = '+00:00'");
+            if (self::$DB) {
+                self::$DB->set_charset('utf8');
+                self::query("SET @@session.time_zone = '+00:00'");
+            }
         }
         if (!self::$DB) throw new Exception('Cant connect to DB');
     }
@@ -77,8 +80,6 @@ class DB extends mysqli {
      * @return mysqli
      */
     public static function start() {
-        $mysqli = new self(MYSQL_HOST, MYSQL_USER, MYSQL_PWD, MYSQL_DB);
-        $mysqli->set_charset('utf8');
-        return $mysqli;
+        return new self(MYSQL_HOST, MYSQL_USER, MYSQL_PWD, MYSQL_DB);
     }
 }

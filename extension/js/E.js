@@ -224,6 +224,7 @@ let E = {
                     url: API,
                     method: 'POST',
                     data: POST,
+                    timeout: E.glb.debug ? 0 : 30000,
                     complete: function (jqXHR, textStatus) {
                         try {
                             if (textStatus !== 'success') {
