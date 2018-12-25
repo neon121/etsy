@@ -12,6 +12,7 @@ try {
             $return['result'] = [
                 'User' => ['regex' => User::regex],
                 'Shop' => ['regex' => Shop::regex],
+                'Customer' => ['regex' => Customer::regex],
                 'debug' => DEBUG
             ];
             break;
@@ -19,12 +20,22 @@ try {
             try {
                 Session::load($_POST['login'], $_POST['password']);
                 if (Session::hasAuth()) {
-                    $return['result'] = ['hash' => Session::hash(), 'role' => Session::role()];
+                    $return['result'] = [
+                        'hash' => Session::hash(),
+                        'role' => Session::role(),
+                        'mustChangePassword' => Session::mustChangePassword()
+                    ];
                 }
                 else $return['result'] = false;
             }
             catch (NoSuchUserException $e) {$return['result'] = 'NO_SUCH_USER';}
             catch (WrongPasswordException $e) {$return['result'] = 'WRONG_PASSWORD';}
+            break;
+        case 'changeOwnPassword':
+            if (Session::hasAuth())
+                $return['result'] = Session::getUser()
+                    ->change(['password' => $_POST['password'], 'mustChangePassword' => false]);
+            else throw new Exception("No auth");
             break;
         case 'destroySession':
             Session::destroy();
@@ -72,17 +83,15 @@ try {
             if ($Obj) $return['result'] = $Obj->delete();
             else throw new Exception("Object {$_POST['type']} with id = {$_POST['id']} not found");
             break;
-        case 'setAssignment':
-            $return['result'] = Assignment::add($_POST['data']);
-            break;
-        case 'removeAssignment':
-            Assignment::deleteById($_POST['id']);
-            break;
         case 'reserveOrder':
             //todo
             break;
         case 'getList':
             $return['result'] = ($_POST['type'])::getArrayList();
+            break;
+        case 'getShortList':
+            $return['result'] = ($_POST['type'])::getShortList();
+            print_r($return['result']);
             break;
         default:
             throw new Exception("Wrong action '" . $_POST['action']."'");

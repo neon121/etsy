@@ -10,6 +10,8 @@
 @red: #ff6a6a;
 @transition: 200ms;
 @animationSlow: 300ms;
+@textInput: ~'input[type="text"], input[type="password"]';
+@checkbox: ~'input[type="checkbox"]';
 .highlightEffect() {
     box-shadow: 0 0 5px 1px lighten(@bgColor, 40%);
     background-color: lighten(@bgColor, 40%);
@@ -55,15 +57,16 @@ body {
     background-color: @bgColor;
     color: @txtColor;
     transition: @transition;
-    
-    input, button {
+
+    @{textInput}, select, button {
         outline: 0;
         border: 1px solid transparent;
         font-family: @inputFont;
+        box-sizing: border-box;
         &:focus, &:hover:not(:disabled) {border-color: @borderAccent}
         &:disabled {opacity: 0.25}
     }
-    input {
+    @{textInput}, select {
         padding: 4px;
         border-radius: 4px;
         background-color: @bgLighten;
@@ -71,6 +74,36 @@ body {
         border-width: 0 0 1px;
         transition: @transition;
         &.error {border-color: @red;}
+        option {background-color: @bgLighten}
+    }
+    @{checkbox} {
+        position: relative;
+        margin: 0;
+        width: 20px;
+        height: 20px;
+        visibility: hidden;
+        font-size: 20px;
+        text-align: center;
+        &::after {
+            content: '\2714';
+            display: block;
+            position: absolute;
+            visibility: visible;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid @bgDarken;
+            border-radius: 25%;
+            background-color: @bgDarken;
+            line-height: 100%;
+            color: transparent;
+            transition: @transition;
+        }
+        &:checked::after {color: @txtDarken;}
+        &:focus::after,
+        &:hover:not(:disabled)::after {border-color: @borderAccent}
+        &:active::after {box-shadow: inset 0 0 5px 0 rgba(153,153,153,1);}
     }
     button {
         background-color: @bgDarken;
@@ -78,8 +111,9 @@ body {
         padding: 5px;
         border-radius: 5px;
         transition: @transition;
+        white-space: nowrap;
         &:active {
-            box-shadow: inset 0px 0px 5px 0px rgba(153,153,153,1);
+            box-shadow: inset 0 0 5px 0 rgba(153,153,153,1);
         }
     }
     
@@ -262,7 +296,7 @@ body {
                 &::after {content: '+';}
                 &:hover {.highlightEffect;}
             }
-            table {
+            .entitiesList {
                 width: 100%;
                 table-layout: fixed;
                 border-collapse: collapse;
@@ -280,56 +314,63 @@ body {
                         text-align: right;
                         padding-right: 0;
                     }
-                }
-                td.forButton {
-                    width: 30px;
-                    padding:0;
-                    vertical-align: middle;
-                    a {
-                        display: block;
-                        box-sizing: border-box;
-                        text-align: center;
-                        cursor: pointer;
-                        svg {
-                            width: 75%;
-                            height: 75%;
-                            path {
-                                fill: @bgDarken;
-                                transition: @transition;
-                            }
-                        }
-                        &.edit:hover svg path{fill: @txtColor;}
-                        &.delete {
-                            position: relative;
-                            height: 30px;
+                    &.forButton {
+                        width: 30px;
+                        padding: 0;
+                        vertical-align: middle;
+                        a {
+                            display: block;
+                            box-sizing: border-box;
+                            text-align: center;
+                            cursor: pointer;
                             svg {
-                                position: absolute;
-                                top: 4px;
-                                left: 0;
-                                transition: @transition * 2;
-                                &.svg1 {
-                                    opacity: 1;
-                                    z-index: 1;
-                                }
-                                &.svg2 {
-                                    opacity: 0;
-                                    z-index: 0;
-                                    path {fill: @red}
+                                width: 75%;
+                                height: 75%;
+                                path {
+                                    fill: @bgDarken;
+                                    transition: @transition;
                                 }
                             }
-                            &.confirm svg {
-                                &.svg1 {
-                                    opacity: 0;
-                                    z-index: 0;
+                            &.edit:hover svg path {
+                                fill: @txtColor;
+                            }
+                            &.delete {
+                                position: relative;
+                                height: 30px;
+                                svg {
+                                    position: absolute;
+                                    top: 4px;
+                                    left: 0;
+                                    transition: @transition * 2;
+                                    &.svg1 {
+                                        opacity: 1;
+                                        z-index: 1;
+                                    }
+                                    &.svg2 {
+                                        opacity: 0;
+                                        z-index: 0;
+                                        path {
+                                            fill: @red
+                                        }
+                                    }
                                 }
-                                &.svg2 {
-                                    opacity: 1;
-                                    z-index: 1;
+                                &.confirm svg {
+                                    &.svg1 {
+                                        opacity: 0;
+                                        z-index: 0;
+                                    }
+                                    &.svg2 {
+                                        opacity: 1;
+                                        z-index: 1;
+                                    }
+                                }
+                                &:hover svg path {
+                                    fill: @red;
                                 }
                             }
-                            &:hover svg path{fill: @red;}
                         }
                     }
+                    &.forPercent {width: 80px;}
                 }
                 tbody {
                     tr {
@@ -337,9 +378,14 @@ body {
                             font-size: 80%;
                             vertical-align: middle;
                             transition: @transition;
-                            input {
-                                width: calc(100% - 20px);
+                            @{textInput}, select {
+                                width: 100%;
                                 background-color: fade(@bgLighten, 50%);
+                                &[data-name="percent"] {
+                                    width: 60px;
+                                    text-align: right;
+                                    margin-right: 5px;
+                                }
                             }
                         }
                         &:nth-child(2n + 1) {
@@ -348,6 +394,21 @@ body {
                         &:hover td {
                             background-color: lighten(@bgColor, 15%);
                         }
+                    }
+                }
+            }
+            &[data-hash="opts"] {
+                .flexBox {
+                    display: flex;
+                    .block {margin-top: 10px;}
+                    table tr td {
+                        padding: 2px;
+                        &:first-child {padding-left: 0;}
+                        &:last-child {padding-right: 0;}
+                    }
+                    button {
+                        width: 100%;
+                        margin-top: 5px;
                     }
                 }
             }
@@ -384,6 +445,24 @@ body {
         display: flex;
         overflow: hidden;
         opacity: 0;
+        table {
+            tr {
+                td {
+                    height: 20px;
+                    padding-bottom: 5px;
+                    &:nth-child(1) {
+                        padding-right: 10px;
+                    }
+                    &.forPercent {
+                        input {
+                            width:60px;
+                            margin-right: 5px;
+                        }
+                    }
+                }
+            }
+            tr:last-child td {padding-bottom: 0;}
+        }
         &.visible {.animationForwards(fullPageShowAnimation);}
         &.hidden {.animationForwards(fullPageHideAnimation);}
         .bg {
@@ -403,18 +482,41 @@ body {
             .close {.closeCrossStyle;}
             .header {
                 text-align: center;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
                 
             }
         }
-        input {
+        @{textInput}, select {
             width: 300px;
-            margin-left: 10px;
         }
         .ok {
             margin-top: 10px;
             display: block;
             width: 100%;
+        }
+        .styledCheckboxes input[type="checkbox"] {
+            width: auto;
+            position: static;
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 14px;
+            -webkit-appearance: none;
+            &::after {
+                width: auto;
+                display: inline-block;
+                position: static;
+                content: attr(title);
+                padding: 5px 5px 0 5px;
+                color: fadeout(@txtColor, 80%);
+                border-radius: 5px;
+            }
+            &:checked::after {
+                color: @txtColor;
+            }
+        }
+        
+        &[data-entity="User"] input[name="password"] {
+            width: 188px;
         }
     }
 }

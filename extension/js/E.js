@@ -12,33 +12,78 @@ let E = {
             if ($('.form.visible').length === 0) screens.removeClass('blur');
         }
     },
-    toggleForm: function(type = null, id = null) {
+    toggleForm: function(type = null, id = null, action = null) {
         if (type === null) {
             $('.form.visible').removeClass('visible').addClass('hidden');
             $('.screen').removeClass('blur');
         }
         else {
-            let form = $('.form[data-entity="'+type+'"]');
-            if (form.length === 0) throw new Error('No form with type '+type);
+            let form;
+            if (action === null) form = $('.form[data-entity="'+type+'"]:not([data-action])');
+            else form = $('.form[data-entity="'+type+'"][data-action='+action+']');
+            if (form.length === 0) throw new Error('No form with type '+type +' action ' + action);
             E.clearInputError(form.find('.error'));
             $('.screen').addClass('blur');
             if (id === null) {
                 form.attr('data-id', null);
                 form.find('input[type=text]').val('');
+                let inputs = form.find('input, select');
+                for (let i = 0; i < inputs.length; i++) {
+                    let input = inputs.eq(i);
+                    let value;
+                    if (input.attr('data-default') !== undefined) value = input.attr('data-default');
+                    else continue;
+                    if (input.attr('type') === 'checkbox') input.prop('checked', value);
+                    else input.val(value);
+                }
                 form.find('select option[data-default="true"]').prop('selected', true);
                 form.removeClass('hidden').addClass('visible');
+                if (type === 'User' && action === null && id === null) form.find('.generatePassword').click();
             }
             else {
                 form.attr('data-id', id);
                 E.toggleLoadingScreen(true);
-                E.callAPI('getEntity', {type: type, id: id}).then(response => {
-                    E.toggleLoadingScreen(false);
+                let promise;
+                if (action === null) promise = E.callAPI('getEntity', {type: type, id: id});
+                else promise = Promise.resolve([]);
+                if ((type === 'User' || type === 'Shop') && action === null) {
+                    promise.then(response => {
+                        return new Promise(resolve => {
+                            E.callAPI('getShortList', {type: type === 'User' ? 'Shop' : 'User'}).then(assignments => {
+                                let div = form.find('.styledCheckboxes');
+                                let checked = [];
+                                let chInp = div.find('input:checked');
+                                if (response.assignments === undefined) {
+                                    for (let i = 0; i < chInp.length; i++)
+                                        checked.push(/[\d]+/.exec(chInp.eq(i).attr('name'))[0]);
+                                    checked.map(value => {return parseInt(value)});
+                                }
+                                else checked = response.assignments;
+                                div.html('');
+                                for (let id in assignments) {
+                                    let name = assignments[id];
+                                    $('<input type="checkbox" name="assignments[' + id + ']" title="' + name + '">')
+                                        .prop('checked', checked.indexOf(parseInt(id)) > -1)
+                                        .appendTo(div);
+                                }
+                                resolve(response);
+                            });
+                        });
+                    });
+                }
+                promise.then(response => {
                     form.removeClass('hidden').addClass('visible');
+                    E.toggleLoadingScreen(false);
                     let inputs = form.find('input, select');
                     for (let i = 0; i < inputs.length; i++) {
                         let input = inputs.eq(i);
-                        let value = response[input.attr('name')];
-                        if (input.type === 'checkbox') input.prop('checked', value);
+                        let name = input.attr('name');
+                        let value = response[name];
+                        if (value === undefined) {
+                            if (input.attr('data-default') !== undefined) value = input.attr('data-default');
+                            else continue;
+                        }
+                        if (input.attr('type') === 'checkbox') input.prop('checked', value === "1");
                         else input.val(value);
                     }
                 });
@@ -49,35 +94,52 @@ let E = {
         let form = $('.form.visible');
         let id = form.attr('data-id');
         let type = form.attr('data-entity');
+        let action = form.attr('data-action');
         let tab = $('.tab[data-hash="'+type+'"]');
         let data = {};
         let inputs = form.find('input, select');
         for (let i = 0; i < inputs.length; i++) {
             let input = inputs.eq(i);
             let name = input.attr('name');
-            if (input.attr('type') === 'checkbox') data[name] = input.prop('selected');
-            else data[name] = input.val();
-            if (!E.testValue(type, name, data[name])) {
+            let value;
+            if (input.attr('type') === 'checkbox') value = input.prop('checked') ? 1 : 0;
+            else value = input.val();
+            if (/\[/.test(name)) {
+                let parsed = /^([-_\w\d]+)\[(\d+)\]/.exec(name);
+                let arrName = parsed[1];
+                let num = parseInt(parsed[2]);
+                if (data[arrName] === undefined) data[arrName] = {};
+                data[arrName][num] = value;
+            }
+            else data[name] = value;
+            if (!E.testValue(type, name, value)) {
+                /* special for password for edit user */
+                if (type === 'User' && action === undefined && name === 'password'
+                    && value === '' && id !== undefined) {
+                    delete data.password;
+                    continue;
+                }
+                /* --------------------------------- */
                 E.msg('Значение не соответствует ограничениям', 'error');
                 input.addClass('error');
                 return;
             }
         }
         E.toggleLoadingScreen(true);
-        let action, post;
+        let postAction, post;
         if (id === undefined) {
-            action = 'addEntity';
+            postAction = 'addEntity';
             post = {type: type, data: data};
         }
         else {
-            action = 'editEntity';
+            postAction = 'editEntity';
             post = {type: type, id: id, data: data}
         }
-        E.callAPI(action, post).then(response => {
+        E.callAPI(postAction, post).then(response => {
             E.toggleLoadingScreen(false);
             if (response.inputError === undefined) {
                 let tr;
-                if (action === 'addEntity') {
+                if (postAction === 'addEntity') {
                     tr = tab.find('.model').clone(true).removeClass('model').prependTo(tab.find('tbody'));
                     tr.attr('data-id', response.id);
                 }
@@ -94,21 +156,26 @@ let E = {
         });
     },
     toggleTab: function(li) {
-        let hash = li.attr('data-hash');
-        li.parents('.tabs').find('li.active').removeClass('active');
-        li.addClass('active');
-        let screen = li.parents('.screen');
-        screen.find('.tab.active').removeClass('active');
-        screen.find('.tab[data-hash="'+hash+'"]').addClass('active');
-        E.set({activeTab: hash});
-        switch (hash) {
-            case 'Shop': case'User':
-                E.loadData(hash);
-                break;
-            default:
-                E.msg('No loading configured');
-                break;
-        }
+        E.get(['mustChangePassword']).then(response => {
+            if (response.mustChangePassword) {
+                li = $('.tabs li[data-hash="opts"]');
+                E.msg('Вы должны сначала сменить пароль');
+            }
+            let hash = li.attr('data-hash');
+            let screen = $('.screen.visible');
+            $('.tabs li.active').removeClass('active');
+            screen.find('.tab.active').removeClass('active');
+            li.addClass('active');
+            screen.find('.tab[data-hash="' + hash + '"]').addClass('active');
+            E.set({activeTab: hash});
+            switch (hash) {
+                case 'Shop':
+                case 'User':
+                case 'Customer':
+                    E.loadData(hash);
+                    break;
+            }
+        });
     },
     loadData: function(hash) {
         E.toggleLoadingScreen(true);
@@ -136,7 +203,9 @@ let E = {
             switch (node[0].nodeName) {
                 case 'INPUT':
                 case 'SELECT':
-                    node.val(value);
+                    if (node.attr('type') === 'checkbox')
+                        node.prop('checked', typeof value === 'boolean' ? value : (parseInt(value) === 1));
+                    else node.val(value);
                     break;
                 default:
                     switch (node.attr('data-type')) {
@@ -185,6 +254,7 @@ let E = {
                 let type = $(this).parents('.tab').attr('data-hash');
                 let name = $(this).attr('data-name');
                 let value = $(this).attr('type') === 'checkbox' ? $(this).prop('checked') : $(this).val();
+                if (typeof value === 'boolean') value = value ? 1 : 0;
                 if (!E.testValue(type, name, value)) {
                     E.msg('Значение не соответствует ограничениям', 'error');
                     $(this).addClass('error');
@@ -204,6 +274,11 @@ let E = {
                 });
             })
             .keypress(function() {E.clearInputError($(this));});
+        if (tr.parents('.tab').attr('data-hash') === 'User') {
+            tr.find('.changePassword').click(function () {
+                E.toggleForm('User', $(this).parents('.entity').attr('data-id'), 'changePassword');
+            });
+        }
     },
     clearInputError: function(obj) {
         obj.removeClass('error');
@@ -219,12 +294,12 @@ let E = {
         return new Promise(resolve => {
             E.get('hash').then(response => {
                 if (response !== undefined) POST.hash = response;
-                if (E.glb.debug) console.log('-->', POST);
+                if (DEBUG) console.log('-->', POST);
                 $.ajax({
                     url: API,
                     method: 'POST',
                     data: POST,
-                    timeout: E.glb.debug ? 0 : 30000,
+                    timeout: DEBUG ? 0 : 30000,
                     complete: function (jqXHR, textStatus) {
                         try {
                             if (textStatus !== 'success') {
@@ -242,7 +317,7 @@ let E = {
                                 console.log('Output:\n' + response.output);
                             }
                             if (response.error !== undefined) throw new Error('Got error:\n' + response.error);
-                            if (E.glb.debug) console.log('<--', response.result);
+                            if (DEBUG) console.log('<--', response.result);
                             resolve(response.result);
                         } catch (e) {
                             E.toggleLoadingScreen(false);
@@ -257,7 +332,7 @@ let E = {
     },
     toggleAuth: (on) => {
         if (on) {
-            E.get(['hash', 'role', 'login', 'activeTab']).then(response => {
+            E.get(['role', 'login', 'activeTab', 'mustChangePassword']).then(response => {
                 $('.screen.login').removeClass('visible');
                 let screen = null;
                 if (response.role === 'manager') screen = $('.screen.manager');
@@ -265,28 +340,35 @@ let E = {
                 screen.addClass('visible');
                 $('.hello .login').text(response.login);
                 $('.hello .role').text(response.role);
-                if (response.activeTab !== undefined) {
-                    let tab = screen.find('.tabs li[data-hash="'+response.activeTab+'"]');
-                    if (tab.length > 0) tab.click();
+                if (response.mustChangePassword) $('.tabs li[data-hash="opts"]').click();
+                else {
+                    if (response.activeTab !== undefined) {
+                        let tab = screen.find('.tabs li[data-hash="' + response.activeTab + '"]');
+                        if (tab.length > 0) tab.click();
+                        else screen.find('.tabs li').eq(0).click();
+                    }
                     else screen.find('.tabs li').eq(0).click();
                 }
-                else screen.find('.tabs li').eq(0).click();
             })
         }
         else {
             $('.screen.visible').removeClass('visible');
             $('.screen.login').addClass('visible');
-            E.rm(['hash', 'role', 'login']);
+            E.rm(['hash', 'role', 'login', 'mustChangePassword']);
         }
     },
+    msgTimer: null,
     msg: (str, type = '') => {
         let msg = $('#message').removeClass('visible');
         if (str) {
             void msg[0].offsetWidth;
             msg.text(str).attr('class', type).addClass('visible');
-            setTimeout(() => msg.click(), 10000);
+            if (E.msgTimer !== null) clearTimeout(E.msgTimer);
+            E.msgTimer = setTimeout(() => msg.click(), 10000);
         }
-        else setTimeout(() => msg.text(''), parseFloat(msg.css('transition').split(' ')[1]));
+        else {
+            setTimeout(() => msg.text(''), parseFloat(msg.css('transition').split(' ')[1]));
+        }
     },
     get: (name = null) => {
         return new Promise(resolve => {
@@ -356,5 +438,16 @@ let E = {
         }
         if (future) return str;
         else return str + ' назад';
+    },
+    generatePasswordString: function() {
+        let symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        let min = 6, max = 10;
+        let string = '';
+        let length = min + Math.floor(Math.random() * (max - min + 1));
+        while (string.length < length) string += symbols[Math.floor(Math.random() * (symbols.length  - 1))];
+        if (!E.testValue('User', 'password', string)) {
+            throw new Error('Generator produces wrong passwords');
+        }
+        return string;
     }
 };

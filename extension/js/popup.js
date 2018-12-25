@@ -1,8 +1,9 @@
+const DEBUG = true;
 const API = 'https://myvds.ml/etsy/api.php';
 $(() => {
     E.get('glb').then(response => {
         return new Promise(resolve => {
-            if (typeof response === 'undefined' || true)
+            if (typeof response === 'undefined' || DEBUG)
                 E.callAPI('getGlobals').then(response => {
                     E.set({glb: response});
                     resolve(response);
@@ -15,6 +16,8 @@ $(() => {
             E.glb.User.regex[i] = new RegExp(E.glb.User.regex[i].substr(1).slice(0, -1));
         for (let i in E.glb.Shop.regex)
             E.glb.Shop.regex[i] = new RegExp(E.glb.Shop.regex[i].substr(1).slice(0, -1));
+        for (let i in E.glb.Customer.regex)
+            E.glb.Customer.regex[i] = new RegExp(E.glb.Customer.regex[i].substr(1).slice(0, -1));
     });
     E.get(['hash', 'role', 'login']).then(response => {
         if (response.hash) {
@@ -33,8 +36,9 @@ $(() => {
     
     $('#message').click(() => E.msg(''));
     
+    $('input, select').keypress(function() {E.clearInputError($(this))});
+    
     let screenLogin = $('.screen.login');
-    screenLogin.find('input').keypress(function() {E.clearInputError($(this))});
     screenLogin.find('button').click(event => {
         event.preventDefault();
         let form = $('.screen.login');
@@ -65,7 +69,12 @@ $(() => {
                 pwdInput.addClass('error');
             }
             else {
-                E.set({'hash': response.hash, role: response.role, login: login});
+                E.set({
+                    hash: response.hash,
+                    role: response.role,
+                    login: login,
+                    mustChangePassword: response.mustChangePassword
+                });
                 E.toggleAuth(true);
             }
         });
@@ -87,7 +96,35 @@ $(() => {
     });
     
     let form = $('.form');
-    form.find('input, select').keypress(function() {E.clearInputError($(this))});
     form.find('.close').click(() => E.toggleForm());
     form.find('.ok').click(() => E.saveForm());
+    
+    $('.generatePassword').click(function() {
+        $(this).parents('.form').find('[name=password]').val(E.generatePasswordString());
+    });
+    
+    $('.changeOwnPassword button').click(function() {
+        let block = $('.changeOwnPassword');
+        let input1 = block.find('[name=password1]');
+        let input2 = block.find('[name=password2]');
+        let password1 = input1.val();
+        let password2 = input2.val();
+        if (!E.testValue('User', 'password', password1)) {
+            input1.addClass('error');
+            E.msg('Пароль не соответствует ограничениям', 'error');
+            return false;
+        }
+        else if (password1 !== password2) {
+            input1.addClass('error');
+            input2.addClass('error');
+            E.msg('Пароли не равны', 'error');
+            return false;
+        }
+        else E.callAPI('changeOwnPassword', {password: password1}).then(response => {
+            input1.val('');
+            input2.val('');
+            E.set({mustChangePassword: false});
+            E.msg('Пароль успешно изменен');
+        })
+    })
 });

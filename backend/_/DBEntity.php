@@ -38,12 +38,14 @@ abstract class DBEntity extends DBUser implements EntityInterface {
         $result = self::query("SELECT * FROM `$class` WHERE id = $id");
         return $result->num_rows ? new $class($result->fetch_assoc()) : false;
     }
+    /**
+     * @return array
+     * @throws Exception
+     */
     public static function getArrayList() {
         $class = get_called_class();
         $result = self::query("SELECT * FROM `$class` WHERE 1 ORDER BY id ASC");
-        $return = [];
-        while ($row = $result->fetch_assoc()) $return[] = $row;
-        return $return;
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
     public function asArray() {
         $class = get_called_class();
@@ -104,6 +106,18 @@ abstract class DBEntity extends DBUser implements EntityInterface {
         /** @var $Object DBEntity */
         $Object = new $class($id);
         $Object->delete();
+    }
+    /**
+     * @param $array
+     * @return bool|mysqli_result
+     * @throws Exception
+     */
+    public static function deleteByData($array) {
+        $class = get_called_class();
+        $WHERE = [];
+        foreach ($array as $name => $value) $WHERE[] = "`$name` = '$value'";
+        $WHERE = implode(' AND ', $WHERE);
+        return self::query("DELETE FROM `$class` WHERE $WHERE");
     }
     /**
      * DBEntity constructor.
@@ -168,5 +182,15 @@ abstract class InputException extends Exception{
                 'input' => $this->input
             ]
         ];
+    }
+}
+
+class NotPassedCheckException extends InputException {
+    public function __construct($name, $value, string $message = "", int $code = 0, Throwable $previous = null)
+    {
+        $this->txt = "$name = '$value' not passed check";
+        $this->input = $name;
+        $this->message = $this->txt;
+        parent::__construct($message, $code, $previous);
     }
 }

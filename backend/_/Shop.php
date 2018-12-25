@@ -17,7 +17,18 @@ class Shop extends DBEntity {
     public static function add($array) {
         //todo check rights
         if (!self::isNameUnique($array['name'])) throw new NameNotUniqueException();
-        return parent::add($array);
+        if (isset($array['assignments'])) {
+            $assignments = $array['assignments'];
+            unset($array['assignments']);
+        }
+        $id = parent::add($array);
+        if (isset($assignments)) {
+            foreach ($array['assignments'] as $userId => $isAssigned) {
+                if ($isAssigned) Assignment::add(['userId' => $userId, 'shopId' => $id]);
+                else  Assignment::deleteByData(['userId' => $userId, 'shopId' => $id]);
+            }
+        }
+        return $id;
     }
     
     /**
@@ -28,7 +39,15 @@ class Shop extends DBEntity {
      */
     public function change($array) {
         //todo check rights
-        if (!self::isNameUnique($array['name'], $this->id)) throw new NameNotUniqueException();
+        if (isset($array['name']) && !self::isNameUnique($array['name'], $this->id))
+            throw new NameNotUniqueException();
+        if (isset($array['assignments'])) {
+            foreach ($array['assignments'] as $userId => $isAssigned) {
+                if ($isAssigned) Assignment::add(['userId' => $userId, 'shopId' => $this->id]);
+                else  Assignment::deleteByData(['userId' => $userId, 'shopId' => $this->id]);
+            }
+            unset($array['assignments']);
+        }
         return parent::change($array);
     }
     /**
@@ -38,6 +57,27 @@ class Shop extends DBEntity {
     public function delete() {
         //todo check rights
         return parent::delete();
+    }
+    
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function asArray() {
+        $return = parent::asArray();
+        $return['assignments'] = array_map(function($v) {return (int)$v['userId'];}, Assignment::getByShop($this->id));
+        return $return;
+    }
+    
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public static function getShortList() {
+        $result = self::query("SELECT `id`, `name` FROM `Shop` ORDER BY id ASC");
+        $return = [];
+        while ($row = $result->fetch_row()) $return[$row[0]] = $row[1];
+        return $return;
     }
     
     /**
@@ -53,7 +93,7 @@ class Shop extends DBEntity {
             elseif ($id !== null && $id == $result->fetch_row()[0]) return true;
             else return false;
         }
-        else throw new Exception("name = '$name' not passed check");
+        else throw new NotPassedCheckException('name', $name);
     }
     
     public static function _checkValue($name, $value) {

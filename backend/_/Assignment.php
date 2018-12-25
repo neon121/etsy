@@ -12,19 +12,11 @@ class Assignment extends DBEntity {
         $userId = (int)$array['userId'];
         $shopId = (int)$array['shopId'];
         $result = self::query(
-            "SELECT id FROM `User` WHERE id = $userId UNION SELECT id FROM `Shop` WHERE id = $shopId");
+            "SELECT id FROM `User` WHERE id = $userId UNION ALL SELECT id FROM `Shop` WHERE id = $shopId");
         if ($result->num_rows < 2) throw new Exception("User($userId) OR shop($shopId) doesn't exist");
+        $result = self::query("SELECT id FROM `Assignment` WHERE userId = $userId AND shopId = $shopId");
+        if ($result->num_rows > 0) return true;
         else return parent::add($array);
-    }
-    
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @throws Exception
-     */
-    public function change($name, $value) {
-        //todo check rights
-        parent::change($name, $value);
     }
     
     /**
@@ -33,6 +25,25 @@ class Assignment extends DBEntity {
     public function delete() {
         //todo check rights
         parent::delete();
+    }
+    
+    /**
+     * @param $id
+     * @return array
+     * @throws Exception
+     */
+    public static function getByUser($id) {
+        $id = (int)$id;
+        return self::query("SELECT * FROM Assignment WHERE userId = $id")->fetch_all(MYSQLI_ASSOC);
+    }
+    /**
+     * @param $id
+     * @return array
+     * @throws Exception
+     */
+    public static function getByShop($id) {
+        $id = (int)$id;
+        return self::query("SELECT * FROM Assignment WHERE shopId = $id")->fetch_all(MYSQLI_ASSOC);
     }
     
     /**

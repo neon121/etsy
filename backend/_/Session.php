@@ -73,6 +73,15 @@ class Session extends DBUser {
         else return false;
     }
     
+    public static function mustChangePassword() {
+        if (is_object(self::$User)) return (bool)self::$User->get('mustChangePassword');
+        else return false;
+    }
+    
+    public static function getUser() {
+        return self::$User;
+    }
+    
     /**
      * @throws Exception
      */

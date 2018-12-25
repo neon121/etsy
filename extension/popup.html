@@ -38,12 +38,13 @@
     <ul class="tabs">
         <li data-hash="Shop">Магазины</li>
         <li data-hash="User">Пользователи</li>
+        <li data-hash="Customer">Заказчики</li>
         <li data-hash="stats">Статистика</li>
         <li data-hash="opts"></li>
     </ul>
     <div class="tab" data-hash="Shop">
         <div class="add"></div>
-        <table>
+        <table class="entitiesList">
             <thead>
             <tr>
                 <td class="forButton"></td>
@@ -65,34 +66,73 @@
     </div>
     <div class="tab" data-hash="User">
         <div class="add"></div>
-        <table>
+        <table class="entitiesList">
             <thead>
             <tr>
                 <td class="forButton"></td>
-                <td>Название</td>
+                <td>Логин</td>
                 <td>Тип</td>
-                <td>Должен сменить пароль</td>
+                <td class="forPercent">Процентр</td>
+                <td></td>
+                <td>Должен сменить</td>
                 <td>Создан</td>
+                <td class="forButton"></td>
             </tr>
             <tr class="model entity">
                 <td class="forButton"><a title="Изменить" class="edit" data-addSVG="pencil.svg"></a></td>
-                <td data-name="login"></td>
-                <td data-name="role"></td>
+                <td><input type="text" data-name="login"></td>
+                <td>
+                    <select data-name="role">
+                        <option value="ADMIN" selected="true">Админ</option>
+                        <option value="MANAGER">Менеджер</option>
+                    </select>
+                </td>
+                <td class="forPercent"><input type="text" data-name="percent">%</td>
+                <td>
+                    <button class="changePassword">Сменить пароль</button>
+                </td>
                 <td><input type="checkbox" data-name="mustChangePassword"></td>
                 <td data-name="created" data-type="date"></td>
+                <td class="forButton">
+                    <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
+                </td>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="tab" data-hash="Customer">
+        <table class="entitiesList">
+            <thead>
+            <tr>
+                <td>Имя</td>
+                <td>Создан</td>
+                <td class="forButton"></td>
+            </tr>
+            <tr class="model entity">
+                <td data-name="name"></td>
+                <td data-name="created" data-type="date"></td>
+                <td class="forButton">
+                    <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
+                </td>
             </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
     <div class="tab" data-hash="stats">
-        <div class="add"></div>
+    
     </div>
     <div class="tab" data-hash="opts">
-        <div class="block">
-            <div class="header">Сменить пароль</div>
-            <label>Новый пароль <input type="text" name="password1"></label>
-            <label>Повторить <input type="text" name="password2"></label>
+        <div class="flexBox">
+            <div class="block changeOwnPassword">
+                <div class="header">Сменить пароль</div>
+                <table>
+                    <tr><td>Новый пароль</td><td><input type="password" name="password1"></td></tr>
+                    <tr><td>Повторить</td><td><input type="password" name="password2"></td></tr>
+                </table>
+                <button>Сменить</button>
+            </div>
         </div>
     </div>
 </div>
@@ -101,7 +141,60 @@
     <div class="content">
         <div class="close"></div>
         <div class="header">Магазин</div>
-        <label>Название <input type="text" name="name"></label>
+        <table>
+            <tr><td>Название</td><td><input type="text" name="name"></td></tr>
+            <tr><td>Пользователи</td><td class="styledCheckboxes"></td></tr>
+        </table>
+        <button class="ok">OK</button>
+    </div>
+</div>
+<div class="form" data-entity="User">
+    <div class="bg"></div>
+    <div class="content">
+        <div class="close"></div>
+        <div class="header">Пользователь</div>
+        <table>
+            <tr><td>Логин</td><td><input type="text" name="login"></td></tr>
+            <tr>
+                <td>Новый пароль</td>
+                <td>
+                    <input type="text" name="password">
+                    <button class="generatePassword">Генерировать</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Роль</td>
+                <td>
+                    <select name="role">
+                        <option value="ADMIN">админ</option>
+                        <option value="MANAGER">менеджер</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Процент</td>
+                <td class="forPercent">
+                    <input type="text" name="percent" data-default="0">%
+                </td>
+            </tr>
+            <tr>
+                <td>Должен сменить пароль</td>
+                <td><input type="checkbox" name="mustChangePassword" data-default="1"></td>
+            </tr>
+            <tr>
+                <td>Магазины</td>
+                <td class="styledCheckboxes"></td>
+            </tr>
+        </table>
+        <button class="ok">OK</button>
+    </div>
+</div>
+<div class="form" data-entity="User" data-action="changePassword">
+    <div class="bg"></div>
+    <div class="content">
+        <div class="close"></div>
+        <div class="header">Сменить пароль</div>
+        <label>Новый пароль пользователя <input type="text" name="password"></label>
         <button class="ok">OK</button>
     </div>
 </div>
