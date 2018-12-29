@@ -14,10 +14,9 @@ class Session extends DBUser {
         if (count($args) === 0 || count($args) > 2) throw new Exception("Need 1 OR 2 arguments");
         elseif (count($args) === 1) {
             $hash = preg_replace('/[^\d\w]/', '', $args[0]);
-            $result = self::query("
-                      SELECT `User`.id FROM `User`
-                      LEFT JOIN `Session` ON `Session`.userId = `User`.id
-                      WHERE `Session`.hash = '$hash'");
+            $result = self::query("SELECT `User`.id FROM `User`\n".
+                "LEFT JOIN `Session` ON `Session`.userId = `User`.id\n".
+                      "WHERE `Session`.hash = '$hash'");
             if ($result->num_rows > 0) {
                 self::$User = User::byId($result->fetch_row()[0]);
                 self::$hash = $hash;

@@ -9,6 +9,7 @@ abstract class DBUser {
     private static $DB;
     private static $used = 0;
     private static $requests = [];
+    private static $time = 0;
     
     /**
      * @throws Exception
@@ -36,7 +37,10 @@ abstract class DBUser {
         $file = $file[1];
         self::$requests[] = ["$file:{$backtrace['line']}", $query];
         self::checkConnection();
-        return self::$DB->query($query);
+        $time = microtime(true);
+        $result = self::$DB->query($query);
+        self::$time += microtime(true) - $time;
+        return $result;
     }
     
     /**
@@ -54,6 +58,7 @@ abstract class DBUser {
         if ($pre) echo '<pre>';
         echo 'REQUESTS: ' . self::$used . "\n";
         foreach (self::$requests as $request) echo $request[0] . "\n" . $request[1] . "\n\n";
+        echo "TIME: " . (round(self::$time * 1000) / 1000) . "\n";
         if ($pre) echo '</pre>';
     }
 }

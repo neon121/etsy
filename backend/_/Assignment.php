@@ -47,6 +47,21 @@ class Assignment extends DBEntity {
     }
     
     /**
+     * @param $shopId
+     * @throws Exception
+     * @throws NotPassedCheckException
+     */
+    public static function getRulesByShop($shopId) {
+        if (!self::_checkValue('shopId', $shopId)) throw new NotPassedCheckException('shopId', $shopId);
+        $result = self::query(
+            "SELECT `User`.id as id, `User`.login, Assignment.type as type, Assignment.argument as argument\n".
+            "FROM Assignment\n".
+            "LEFT JOIN `User` ON userId = `User`.id\n".
+            "WHERE Assignment.shopId = $shopId");
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+    
+    /**
      * @param string $name
      * @param mixed $value
      * @return bool

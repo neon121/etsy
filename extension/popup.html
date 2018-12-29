@@ -49,12 +49,14 @@
             <tr>
                 <td class="forButton"></td>
                 <td>Название</td>
+                <td></td>
                 <td>Создан</td>
                 <td class="forButton"></td>
             </tr>
             <tr class="model entity">
                 <td class="forButton"><a title="Изменить" class="edit" data-addSVG="pencil.svg"></a></td>
                 <td><input data-name="name" type="text"/></td>
+                <td><button class="changeReservation">Правила резервации</button></td>
                 <td data-name="created" data-type="date"></td>
                 <td class="forButton">
                     <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
@@ -72,9 +74,9 @@
                 <td class="forButton"></td>
                 <td>Логин</td>
                 <td>Тип</td>
-                <td class="forPercent">Процентр</td>
                 <td></td>
-                <td>Должен сменить</td>
+                <td>Процентр</td>
+                <td></td>
                 <td>Создан</td>
                 <td class="forButton"></td>
             </tr>
@@ -87,11 +89,12 @@
                         <option value="MANAGER">Менеджер</option>
                     </select>
                 </td>
-                <td class="forPercent"><input type="text" data-name="percent">%</td>
+                <td><button class="customersAssignment">Клиенты</button></td>
+                <td><input type="text" data-name="percent">%</td>
                 <td>
-                    <button class="changePassword">Сменить пароль</button>
+                    <button class="changePassword" title="Сменить пароль">Пароль</button>
+                    <input type="checkbox" data-name="mustChangePassword" title="Должен сменить">
                 </td>
-                <td><input type="checkbox" data-name="mustChangePassword"></td>
                 <td data-name="created" data-type="date"></td>
                 <td class="forButton">
                     <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
@@ -148,6 +151,33 @@
         <button class="ok">OK</button>
     </div>
 </div>
+<div class="form" data-entity="Shop" data-action="changeReservation">
+    <div class="bg"></div>
+    <div class="content">
+        <div class="close"></div>
+        <div class="help"></div>
+        <div class="header">Правила резервации</div>
+        <table>
+            <thead>
+            <tr class="model">
+                <td data-name="login"></td>
+                <td>
+                    <select data-name="type" data-default="">
+                        <option disabled value="">---ТИП---</option>
+                        <option value="ORDER">По порядку</option>
+                        <option value="TIME">Период времени</option>
+                        <option value="COUNT">Кол-во заказов</option>
+                    </select>
+                </td>
+                <td><input type="text" data-name="argument" placeholder="агрумент"></td>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="ok">OK</button>
+    </div>
+</div>
+<div class="helpText" data-entity="Shop" data-action="changeReservation">Тут будем помощь по типам и аргументам</div>
 <div class="form" data-entity="User">
     <div class="bg"></div>
     <div class="content">
@@ -173,9 +203,7 @@
             </tr>
             <tr>
                 <td>Процент</td>
-                <td class="forPercent">
-                    <input type="text" name="percent" data-default="0">%
-                </td>
+                <td><input type="text" name="percent" data-default="0">%</td>
             </tr>
             <tr>
                 <td>Должен сменить пароль</td>

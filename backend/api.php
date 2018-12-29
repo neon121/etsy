@@ -91,7 +91,9 @@ try {
             break;
         case 'getShortList':
             $return['result'] = ($_POST['type'])::getShortList();
-            print_r($return['result']);
+            break;
+        case 'getAssignmentsRules':
+            $return['result'] = Assignment::getRulesByShop($_POST['shopId']);
             break;
         default:
             throw new Exception("Wrong action '" . $_POST['action']."'");

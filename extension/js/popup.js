@@ -98,6 +98,8 @@ $(() => {
     let form = $('.form');
     form.find('.close').click(() => E.toggleForm());
     form.find('.ok').click(() => E.saveForm());
+    form.find('.help').click(() => E.toggleHelp());
+    $(document).keyup(function(event) {if(event.key === 'Escape') E.doClosing();});
     
     $('.generatePassword').click(function() {
         $(this).parents('.form').find('[name=password]').val(E.generatePasswordString());

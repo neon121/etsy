@@ -160,6 +160,25 @@ body {
         }
     }
     
+    .add {
+        display: inline-block;
+        cursor: pointer;
+        background-color: @bgDarken;
+        color: @bgColor;
+        font-size: 33px;
+        text-align: center;
+        font-family: "Courier New", monospace;
+        font-weight: bolder;
+        width: 30px;
+        height: 30px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        border-radius: 25%;
+        transition: @transition;
+        &::after {content: '+';}
+        &:hover {.highlightEffect;}
+    }
+    
     #loading {
         position: absolute;
         top: 0;
@@ -219,6 +238,7 @@ body {
         }
         &.admin, &.manager {
             min-width: 1000px;
+            min-height: 500px;
         }
         
         .header {
@@ -278,24 +298,6 @@ body {
         .tab {
             display: none;
             &.active {display: block;}
-            .add {
-                display: inline-block;
-                cursor: pointer;
-                background-color: @bgDarken;
-                color: @bgColor;
-                font-size: 33px;
-                text-align: center;
-                font-family: "Courier New", monospace;
-                font-weight: bolder;
-                width: 30px;
-                height: 30px;
-                box-sizing: border-box;
-                margin-bottom: 10px;
-                border-radius: 25%;
-                transition: @transition;
-                &::after {content: '+';}
-                &:hover {.highlightEffect;}
-            }
             .entitiesList {
                 width: 100%;
                 table-layout: fixed;
@@ -305,14 +307,12 @@ body {
                     opacity: 0;
                 }
                 td {
-                    padding: 5px;
-                    &:first-child {
-                        padding-left: 0;
-                        text-align: left;
-                    }
-                    &:last-child {
+                    padding: 3px;
+                    &:first-child {padding-left: 0;}
+                    &:last-child {padding-right: 0;}
+                    &:nth-last-child(2) {
                         text-align: right;
-                        padding-right: 0;
+                        padding-right: 15px;
                     }
                     &.forButton {
                         width: 30px;
@@ -370,7 +370,6 @@ body {
                             }
                         }
                     }
-                    &.forPercent {width: 80px;}
                 }
                 tbody {
                     tr {
@@ -395,6 +394,19 @@ body {
                             background-color: lighten(@bgColor, 15%);
                         }
                     }
+                }
+            }
+            &[data-hash="User"] table tr td {
+                &:nth-child(4){width:69px;}
+                &:nth-child(5){width: 80px;}
+                &:nth-child(6){
+                    width: 92px;
+                    input[type="checkbox"] {
+                        width: 28px;
+                        height:24px;
+                        &::after {padding-top: 4px;}
+                    }
+                    button {vertical-align: top;}
                 }
             }
             &[data-hash="opts"] {
@@ -446,22 +458,27 @@ body {
         overflow: hidden;
         opacity: 0;
         table {
+            table-layout: fixed;
+            border-collapse: collapse;
             tr {
                 td {
                     height: 20px;
-                    padding-bottom: 5px;
-                    &:nth-child(1) {
-                        padding-right: 10px;
-                    }
-                    &.forPercent {
-                        input {
-                            width:60px;
-                            margin-right: 5px;
-                        }
-                    }
+                    padding: 2px;
+                    @{textInput}, select {width: 100%;}
+                    &:first-child {padding-left:0}
+                    &:last-child {padding-right: 0;}
                 }
             }
             tr:last-child td {padding-bottom: 0;}
+        }
+        &[data-entity="User"]:not([data-action]) table tr:nth-child(4) input[name="percent"] {
+            width:60px;
+            margin-right: 5px;
+            text-align: right;
+        }
+        &[data-action="changeReservation"] table tr td {
+            &:nth-child(2) {width: 151px;}
+            &:nth-child(3) {width: 150px;}
         }
         &.visible {.animationForwards(fullPageShowAnimation);}
         &.hidden {.animationForwards(fullPageHideAnimation);}
@@ -480,10 +497,15 @@ body {
             padding: 10px;
             margin: 0 auto;
             .close {.closeCrossStyle;}
+            .help {
+                .closeCrossStyle;
+                right: auto;
+                left: 5px;
+                &::after {content: "?";}
+            }
             .header {
                 text-align: center;
                 margin-bottom: 15px;
-                
             }
         }
         @{textInput}, select {
@@ -518,5 +540,14 @@ body {
         &[data-entity="User"] input[name="password"] {
             width: 188px;
         }
+    }
+    .helpText {
+        position: absolute;
+        padding: 5px;
+        top: -10%;
+        left: -50%;
+        width: auto;
+        font-size: 80%;
+        background-color: @bgLighten;
     }
 }

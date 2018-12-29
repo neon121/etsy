@@ -38,7 +38,10 @@ let E = {
                 }
                 form.find('select option[data-default="true"]').prop('selected', true);
                 form.removeClass('hidden').addClass('visible');
-                if (type === 'User' && action === null && id === null) form.find('.generatePassword').click();
+                if (type === 'User' && action === null) form.find('.generatePassword').click();
+                if ((type === 'User' || type === 'Shop') && action === null)
+                    E.toggleLoadingScreen(true);
+                    E.addAssignmentsCheckboxes([], form, type).then(() => E.toggleLoadingScreen(false));
             }
             else {
                 form.attr('data-id', id);
@@ -46,27 +49,22 @@ let E = {
                 let promise;
                 if (action === null) promise = E.callAPI('getEntity', {type: type, id: id});
                 else promise = Promise.resolve([]);
-                if ((type === 'User' || type === 'Shop') && action === null) {
+                if ((type === 'User' || type === 'Shop') && action === null)
+                    promise.then(response => {return E.addAssignmentsCheckboxes(response, form, type)});
+                else if (type === 'Shop' && action === 'changeReservation') {
                     promise.then(response => {
                         return new Promise(resolve => {
-                            E.callAPI('getShortList', {type: type === 'User' ? 'Shop' : 'User'}).then(assignments => {
-                                let div = form.find('.styledCheckboxes');
-                                let checked = [];
-                                let chInp = div.find('input:checked');
-                                if (response.assignments === undefined) {
-                                    for (let i = 0; i < chInp.length; i++)
-                                        checked.push(/[\d]+/.exec(chInp.eq(i).attr('name'))[0]);
-                                    checked.map(value => {return parseInt(value)});
+                            E.toggleLoadingScreen(true);
+                            E.callAPI('getAssignmentsRules', {type: 'Assignment', shopId: id}).then(response => {
+                                E.toggleLoadingScreen(false);
+                                let table = form.find('table');
+                                let tbody = table.find('tbody');
+                                tbody.html('');
+                                let model = table.find('.model');
+                                for (let assignment of response) {
+                                    let tr = model.clone(true).removeClass('model').prependTo(tbody);
+                                    E.formatEntityBlock(tr, assignment);
                                 }
-                                else checked = response.assignments;
-                                div.html('');
-                                for (let id in assignments) {
-                                    let name = assignments[id];
-                                    $('<input type="checkbox" name="assignments[' + id + ']" title="' + name + '">')
-                                        .prop('checked', checked.indexOf(parseInt(id)) > -1)
-                                        .appendTo(div);
-                                }
-                                resolve(response);
                             });
                         });
                     });
@@ -89,6 +87,44 @@ let E = {
                 });
             }
         }
+    },
+    toggleHelp: function() {
+        let form = $('.form.visible');
+        if (form.length === 0) throw new Error("No active form");
+        let help = form.find('.helpText');
+        if (help.length === 0) throw new Error("No help here");
+        if (help.hasClass('visible')) help.removeClass('visible').addClass('hidden');
+        else help.addClass('visible').removeClass('hidden');
+    },
+    doClosing: function() {
+        let form = $('.form.visible');
+        let help = form.find('.helpText.visible');
+        if (help.length === 1) help.removeClass('visible').addClass('hidden');
+        else E.toggleForm();
+    },
+    addAssignmentsCheckboxes: function(response, form, type) {
+        return new Promise(resolve => {
+            E.callAPI('getShortList', {type: type === 'User' ? 'Shop' : 'User'}).then(assignments => {
+                let div = form.find('.styledCheckboxes');
+                let checked = [];
+                let chInp = div.find('input:checked');
+                if (response.assignments === undefined) {
+                    for (let i = 0; i < chInp.length; i++)
+                        checked.push(/[\d]+/.exec(chInp.eq(i).attr('name'))[0]);
+                    checked.map(value => {return parseInt(value)});
+                }
+                else checked = response.assignments;
+                div.html('');
+                for (let id in assignments) {
+                    if (!assignments.hasOwnProperty(id)) continue;
+                    let name = assignments[id];
+                    $('<input type="checkbox" name="assignments[' + id + ']" title="' + name + '">')
+                        .prop('checked', checked.indexOf(parseInt(id)) > -1)
+                        .appendTo(div);
+                }
+                resolve(response);
+            });
+        });
     },
     saveForm: function() {
         let form = $('.form.visible');
@@ -274,11 +310,15 @@ let E = {
                 });
             })
             .keypress(function() {E.clearInputError($(this));});
-        if (tr.parents('.tab').attr('data-hash') === 'User') {
-            tr.find('.changePassword').click(function () {
-                E.toggleForm('User', $(this).parents('.entity').attr('data-id'), 'changePassword');
-            });
-        }
+        tr.find('.changePassword').click(function () {
+            E.toggleForm('User', $(this).parents('.entity').attr('data-id'), 'changePassword');
+        });
+        tr.find('.changeReservation').click(function() {
+            E.toggleForm('Shop', $(this).parents('.entity').attr('data-id'), 'changeReservation');
+        });
+        tr.find('.customersAssignment').click(function() {
+            E.toggleForm('Shop', $(this).parents('.entity').attr('data-id'), 'changeReservation');
+        });
     },
     clearInputError: function(obj) {
         obj.removeClass('error');

@@ -8,8 +8,8 @@ class User extends DBEntity {
         'percent' => '/^\d[\d\.]*$/'
     ];
     protected const columns = ['id', 'role', 'created', 'login', 'passwordHash', 'salt',
-        'reservationRule', 'mustChangePassword', 'percent'];
-    public $id, $role, $created, $login, $mustChangePassword, $reservationRule, $percent;
+        'mustChangePassword', 'percent'];
+    public $id, $role, $created, $login, $mustChangePassword, $percent;
     
     /**
      * @param $password
@@ -53,16 +53,6 @@ class User extends DBEntity {
                 else throw new WrongPasswordException();
             }
         }
-    }
-    
-    /**
-     * User constructor.
-     * @param $arg
-     * @throws Exception
-     */
-    public function __construct($arg) {
-        parent::__construct($arg);
-        $this->reservationRule = json_decode($this->reservationRule);
     }
     
     /**
@@ -132,7 +122,7 @@ class User extends DBEntity {
      */
     public static function getArrayList() {
         $result = self::query("
-                          SELECT id, role, created, login, reservationRule, mustChangePassword, percent
+                          SELECT id, role, created, login, mustChangePassword, percent
                           FROM `User`
                           WHERE role != 'SUPER'
                           ORDER BY id ASC");
@@ -208,8 +198,6 @@ class User extends DBEntity {
                     return preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $value) == 1;
                 case 'login':
                     return preg_match(self::regex['login'], $value) == 1;
-                case 'reservationRule':
-                    return $value === null || is_array(json_decode($value, true));
                 case 'mustChangePassword':
                     return is_bool($value) || $value == 1 || $value == 0;
                 case 'percent':
