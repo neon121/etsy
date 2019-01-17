@@ -19,7 +19,8 @@ abstract class DBUser {
             self::$DB = DB::start();
             if (self::$DB) {
                 self::$DB->set_charset('utf8');
-                self::query("SET @@session.time_zone = '+00:00'");
+                $offset = (TIMEZONE_OFFSET >= 0 ? '+' : '-') . sprintf("%'02s", TIMEZONE_OFFSET) . ':00';
+                self::query("SET @@session.time_zone = '$offset'");
             }
         }
         if (!self::$DB) throw new Exception('Cant connect to DB');

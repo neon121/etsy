@@ -1,4 +1,9 @@
 <?php
+echo date('Z');
+for ($x = 1; $x < 10; $x++) {
+    echo $x;
+}
+exit;
 require '_/_.php';
 if (!DEBUG) exit;
 Session::debugMode();

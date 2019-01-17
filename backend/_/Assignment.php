@@ -1,6 +1,6 @@
 <?php
 class Assignment extends DBEntity {
-    private const columns = ['id', 'userId', 'shopId'];
+    private const columns = ['id', 'userId', 'shopId', 'type', 'argument'];
     
     /**
      * @param array $array
@@ -48,16 +48,17 @@ class Assignment extends DBEntity {
     
     /**
      * @param $shopId
+     * @return mixed
      * @throws Exception
      * @throws NotPassedCheckException
      */
     public static function getRulesByShop($shopId) {
         if (!self::_checkValue('shopId', $shopId)) throw new NotPassedCheckException('shopId', $shopId);
         $result = self::query(
-            "SELECT `User`.id as id, `User`.login, Assignment.type as type, Assignment.argument as argument\n".
+            "SELECT `Assignment`.id as id, `User`.login, Assignment.type as type, Assignment.argument as argument\n".
             "FROM Assignment\n".
             "LEFT JOIN `User` ON userId = `User`.id\n".
-            "WHERE Assignment.shopId = $shopId");
+            "WHERE Assignment.shopId = $shopId AND `User`.role = 'MANAGER'");
         return $result->fetch_all(MYSQLI_ASSOC);
     }
     
@@ -74,6 +75,10 @@ class Assignment extends DBEntity {
                 case 'shopId':
                 case 'userId':
                     return preg_match('/^\d+$/', $value) == 1;
+                case 'type':
+                    return array_search($value, ['ORDER', 'TIME', 'COUNT', null]) !== false;
+                case 'argument':
+                    return preg_match('/^[-\d:\/]*$/', $value) == 1;
             }
         }
     }

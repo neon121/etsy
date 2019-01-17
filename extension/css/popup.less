@@ -39,7 +39,7 @@
     &::after {content: "x";}
     &:hover {.highlightEffect;}
 }
-.fill() {width: 100%; height: 100%;}
+.fill(@w: 100%, @h: 100%) {width: @w; height: @h}
 .hide() {width: 0; height: 0;}
 @keyframes fullPageShowAnimation {
     0% {opacity: 0; .hide();}
@@ -49,6 +49,16 @@
 @keyframes fullPageHideAnimation {
     0% {opacity: 1; .fill()}
     99% {opacity: 0; .fill()}
+    100% {opacity: 0; .hide()}
+}
+@keyframes helpShowAnimation {
+    0% {opacity: 0; .hide()}
+    1% {opacity: 0; .fill(400px, auto);}
+    100% { opacity: 1; .fill(400px, auto);}
+}
+@keyframes helpHideAnimation {
+    0% {opacity: 1; .fill(400px, auto);}
+    99% {opacity: 0; .fill(400px, auto);}
     100% {opacity: 0; .hide()}
 }
 
@@ -457,29 +467,6 @@ body {
         display: flex;
         overflow: hidden;
         opacity: 0;
-        table {
-            table-layout: fixed;
-            border-collapse: collapse;
-            tr {
-                td {
-                    height: 20px;
-                    padding: 2px;
-                    @{textInput}, select {width: 100%;}
-                    &:first-child {padding-left:0}
-                    &:last-child {padding-right: 0;}
-                }
-            }
-            tr:last-child td {padding-bottom: 0;}
-        }
-        &[data-entity="User"]:not([data-action]) table tr:nth-child(4) input[name="percent"] {
-            width:60px;
-            margin-right: 5px;
-            text-align: right;
-        }
-        &[data-action="changeReservation"] table tr td {
-            &:nth-child(2) {width: 151px;}
-            &:nth-child(3) {width: 150px;}
-        }
         &.visible {.animationForwards(fullPageShowAnimation);}
         &.hidden {.animationForwards(fullPageHideAnimation);}
         .bg {
@@ -505,7 +492,7 @@ body {
             }
             .header {
                 text-align: center;
-                margin-bottom: 15px;
+                margin: 0 20px 15px;
             }
         }
         @{textInput}, select {
@@ -515,6 +502,10 @@ body {
             margin-top: 10px;
             display: block;
             width: 100%;
+        }
+        .text {
+            font-size: 80%;
+            margin-bottom: 10px;
         }
         .styledCheckboxes input[type="checkbox"] {
             width: auto;
@@ -536,18 +527,71 @@ body {
                 color: @txtColor;
             }
         }
+        .helpText {
+            position: absolute;
+            padding: 10px;
+            top: 5px;
+            left: 5px;
+            border-radius: 5px;
+            max-width: 100%;
+            font-size: 80%;
+            background-color: @bgLighten;
+            line-height: 1.4;
+            z-index: 300;
+            transition: @transition;
+            opacity: 0;
+            .hide();
+            &.visible {.animationForwards(helpShowAnimation);}
+            &.hidden {.animationForwards(helpHideAnimation);}
+        }
+        table {
+            table-layout: fixed;
+            border-collapse: collapse;
+            tr {
+                td {
+                    height: 20px;
+                    padding: 2px;
+                    @{textInput}, select {width: 100%;}
+                    &:first-child {padding-left:0}
+                    &:last-child {padding-right: 0;}
+                }
+            }
+            tr:last-child td {padding-bottom: 0;}
+        }
         
+        &[data-entity="User"]:not([data-action]) table tr:nth-child(4) input[name="percent"] {
+            width:60px;
+            margin-right: 5px;
+            text-align: right;
+        }
+        &[data-action="setAssignmentsRules"] table tr td {
+            &:nth-child(2) {width: 151px;}
+            &:nth-child(3) {width: 300px;}
+        }
         &[data-entity="User"] input[name="password"] {
             width: 188px;
         }
+        &[data-entity="User"][data-action="customersAssignment"] table {
+            table-layout: auto;
+            width: 100%;
+            tr td {
+                font-size: 80%;
+                &:nth-child(2n-1) {
+                    padding-right: 5px;
+        
+                }
+                &:nth-child(2n) {
+                    padding-right: 20px;
+                    &:last-child {padding-right: 0;}
+                }
+                input[type="checkbox"] {
+                    vertical-align: -5px;
+                    &.foreign:not(:checked) {
+                        opacity: 0.2
+                    }
+                }
+            }
+        }
     }
-    .helpText {
-        position: absolute;
-        padding: 5px;
-        top: -10%;
-        left: -50%;
-        width: auto;
-        font-size: 80%;
-        background-color: @bgLighten;
-    }
+    
 }

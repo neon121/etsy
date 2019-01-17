@@ -13,7 +13,7 @@ try {
                 'User' => ['regex' => User::regex],
                 'Shop' => ['regex' => Shop::regex],
                 'Customer' => ['regex' => Customer::regex],
-                'debug' => DEBUG
+                'debug' => DEBUG,
             ];
             break;
         case 'checkLogin':
@@ -83,8 +83,8 @@ try {
             if ($Obj) $return['result'] = $Obj->delete();
             else throw new Exception("Object {$_POST['type']} with id = {$_POST['id']} not found");
             break;
-        case 'reserveOrder':
-            //todo
+        case 'getActiveCustomers':
+            $return['result'] = Customer::getActive();
             break;
         case 'getList':
             $return['result'] = ($_POST['type'])::getArrayList();
@@ -94,6 +94,12 @@ try {
             break;
         case 'getAssignmentsRules':
             $return['result'] = Assignment::getRulesByShop($_POST['shopId']);
+            break;
+        case 'setAssignmentsRules':
+            foreach ($_POST['data'] as $id => $array) {
+                $Assignment = Assignment::byId($id);
+                $Assignment->change($array);
+            }
             break;
         default:
             throw new Exception("Wrong action '" . $_POST['action']."'");

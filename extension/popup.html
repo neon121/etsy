@@ -56,7 +56,7 @@
             <tr class="model entity">
                 <td class="forButton"><a title="Изменить" class="edit" data-addSVG="pencil.svg"></a></td>
                 <td><input data-name="name" type="text"/></td>
-                <td><button class="changeReservation">Правила резервации</button></td>
+                <td><button class="setAssignmentsRules">Правила резервации</button></td>
                 <td data-name="created" data-type="date"></td>
                 <td class="forButton">
                     <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
@@ -109,11 +109,13 @@
             <thead>
             <tr>
                 <td>Имя</td>
+                <td>Менеджер</td>
                 <td>Создан</td>
                 <td class="forButton"></td>
             </tr>
             <tr class="model entity">
                 <td data-name="name"></td>
+                <td data-name="login"></td>
                 <td data-name="created" data-type="date"></td>
                 <td class="forButton">
                     <a title="Удалить" class="delete" data-addSVG="delete.svg danger.svg"></a>
@@ -151,12 +153,12 @@
         <button class="ok">OK</button>
     </div>
 </div>
-<div class="form" data-entity="Shop" data-action="changeReservation">
+<div class="form" data-entity="Shop" data-action="setAssignmentsRules">
     <div class="bg"></div>
     <div class="content">
         <div class="close"></div>
         <div class="help"></div>
-        <div class="header">Правила резервации</div>
+        <div class="header">Правила резервации клиентов</div>
         <table>
             <thead>
             <tr class="model">
@@ -169,15 +171,35 @@
                         <option value="COUNT">Кол-во заказов</option>
                     </select>
                 </td>
-                <td><input type="text" data-name="argument" placeholder="агрумент"></td>
+                <td><input type="text" data-name="argument" placeholder="аргумент"></td>
             </tr>
             </thead>
             <tbody></tbody>
         </table>
         <button class="ok">OK</button>
     </div>
+    <div class="helpText">
+        Если у менеджера не определены правила резервации, то он не может резервировать клиентов!<br/>
+        Правила определимы ТОЛЬКО для менеджеров.<br/>
+        <b>Типы правил:<br/>
+        <ul>
+            <li>
+                <u>По порядку</u> аргумент должен быть целым числом больше нуля (1, 5, 100).
+                Счет идет от меньшего к бОльшему: например, менеджер с аргументом 100 не сможет брать заказы, пока
+                заказ не зарезервируют все менеджеры с арументом меньше 100. Пропуск чисел допустим и не оказывает
+                влияния на органичения
+            </li>
+            <li>
+                <u>По времени</u> аргумент должен быть записью времени вида "10:00-11:30". ВНИМАНИЕ! Расчет ведется
+                по времени API-сервера.
+            </li>
+            <li>
+                <u>Кол-во заказов</u> аргумент должен быть вида "10/2", где 10 - максимальное кол-во заказов за указанный
+                период, 2 - период в днях. Допустима укороченная запись "10", кол-во дней считается равным 1
+            </li>
+        </ul>
+    </div>
 </div>
-<div class="helpText" data-entity="Shop" data-action="changeReservation">Тут будем помощь по типам и аргументам</div>
 <div class="form" data-entity="User">
     <div class="bg"></div>
     <div class="content">
@@ -223,6 +245,26 @@
         <div class="close"></div>
         <div class="header">Сменить пароль</div>
         <label>Новый пароль пользователя <input type="text" name="password"></label>
+        <button class="ok">OK</button>
+    </div>
+</div>
+<div class="form" data-entity="User" data-action="customersAssignment">
+    <div class="bg"></div>
+    <div class="content">
+        <span name="login"></span>
+        <div class="close"></div>
+        <div class="header">Активные клиенты менеджера</div>
+        <div class="text">Полупрозрачность чекбокса означает, что этот заказчик уже закреплен за другим менеджером</div>
+        <div data-name="login"></div>
+        <table>
+            <thead>
+            <tr class="model">
+                <td data-name="name"></td>
+                <td><input type="checkbox" data-name="isAssigned"></td>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
         <button class="ok">OK</button>
     </div>
 </div>

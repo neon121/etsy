@@ -99,6 +99,7 @@ $(() => {
     form.find('.close').click(() => E.toggleForm());
     form.find('.ok').click(() => E.saveForm());
     form.find('.help').click(() => E.toggleHelp());
+    form.find('.helpText').click(() => E.toggleHelp());
     $(document).keyup(function(event) {if(event.key === 'Escape') E.doClosing();});
     
     $('.generatePassword').click(function() {

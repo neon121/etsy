@@ -29,7 +29,7 @@ abstract class DBEntity extends DBUser implements EntityInterface {
     }
     /**
      * @param $id
-     * @return bool|object
+     * @return bool|DBEntity
      * @throws Exception
      */
     public static function byId($id) {
@@ -70,6 +70,7 @@ abstract class DBEntity extends DBUser implements EntityInterface {
             $string = "`$name` = ";
             if (is_bool($value)) $string .= $value ? 1 : 0;
             elseif (is_int($value) || is_float($value)) $string .= $value;
+            elseif (is_null($value)) $string .= 'NULL';
             else $string .= "'$value'";
             $strings[] = $string;
         }

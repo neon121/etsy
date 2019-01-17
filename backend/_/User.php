@@ -80,7 +80,14 @@ class User extends DBEntity {
             }
             unset($array['assignments']);
         }
-        parent::change($array);
+        if (isset($array['customers'])) {
+            foreach ($array['customers'] as $customerId => $isAssigned) {
+                $Customer = Customer::byId($customerId);
+                $Customer->change(['userId' => (int)$isAssigned ? (int)$_POST['id'] : NULL]);
+            }
+            unset($array['customers']);
+        }
+        if (count($array) > 0) parent::change($array);
     }
     
     /**
@@ -147,6 +154,7 @@ class User extends DBEntity {
         unset($return['passwordHash']);
         unset($return['salt']);
         $return['assignments'] = array_map(function($v) {return (int)$v['shopId'];}, Assignment::getByUser($this->id));
+        $return['customers'] = array_map(function($v) {return (int)$v['shopId'];}, Customer::getByUser($this->id));
         return $return;
     }
     
