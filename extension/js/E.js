@@ -116,6 +116,7 @@ let E = {
                     for (let i = 0; i < inputs.length; i++) {
                         let input = inputs.eq(i);
                         let name = input.attr('name');
+                        if (name === undefined) continue;
                         let value = response[name];
                         if (value === undefined) {
                             if (input.attr('data-default') !== undefined) value = input.attr('data-default');
@@ -394,7 +395,7 @@ let E = {
         return new Promise(resolve => {
             E.get('hash').then(response => {
                 if (response !== undefined) POST.hash = response;
-                if (DEBUG) console.log('-->', POST);
+                    if (DEBUG) console.log('-->', POST);
                 $.ajax({
                     url: API,
                     method: 'POST',

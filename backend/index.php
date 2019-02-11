@@ -1,11 +1,9 @@
 <?php
-echo date('Z');
-for ($x = 1; $x < 10; $x++) {
-    echo $x;
-}
-exit;
+$arr = [$_GET, $_POST];
+echo json_encode($arr);
 require '_/_.php';
 if (!DEBUG) exit;
+exit;
 Session::debugMode();
 if (isset($_GET['action'])) switch ($_GET['action']) {
     case 'createSuperAdminUser':
